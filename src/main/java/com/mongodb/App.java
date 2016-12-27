@@ -25,14 +25,14 @@ public class App
 {
     public static void main( String[] args )
     {
-        //Insert
+//        //Insert
 //        MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
 //
 //        MongoDatabase db = client.getDatabase("course");
 //
 //        MongoCollection<Document> collection = db.getCollection("insertTest");
 //
-//        collection.drop();;
+//        collection.drop();
 //
 //        Document smith = new Document("name", "Smith")
 //                .append("age", 30)
@@ -42,7 +42,7 @@ public class App
 //                .append("age", 25)
 //                .append("profession", "hacker");
 //
-//        collection.insertOne(smith);
+////        collection.insertOne(smith);
 //        collection.insertMany(Arrays.asList(smith,john));
 
 
@@ -182,26 +182,56 @@ public class App
 //            System.out.println(cur);
 //        }
 
-        //Delete
+//        //Delete
+//        MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
+//
+//        MongoDatabase db = client.getDatabase("course");
+//
+//        MongoCollection<Document> collection = db.getCollection("test");
+//
+//        collection.drop();;
+//
+//        for (int i = 0; i < 8; i++) {
+//            collection.insertOne(new Document("_id", i));
+//        }
+//
+//        collection.deleteOne(Filters.gt("_id", 4));
+////        collection.deleteMany(Filters.gt("_id", 4));
+//
+//        List<Document> all = collection.find().into(new ArrayList<Document>());
+//
+//        for (Document cur:all) {
+//            System.out.println(cur);
+//        }
+
+
+        //Complicate Delete
         MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
 
-        MongoDatabase db = client.getDatabase("course");
+        MongoDatabase db = client.getDatabase("students");
 
-        MongoCollection<Document> collection = db.getCollection("test");
-
-        collection.drop();;
-
-        for (int i = 0; i < 8; i++) {
-            collection.insertOne(new Document("_id", i));
-        }
+        MongoCollection<Document> collection = db.getCollection("grades");
 
         collection.deleteOne(Filters.gt("_id", 4));
-//        collection.deleteMany(Filters.gt("_id", 4));
 
-        List<Document> all = collection.find().into(new ArrayList<Document>());
+        Bson filter = Filters.eq("type", "homework");
+        Bson sort = Sorts.orderBy(Sorts.ascending("student_id"), Sorts.ascending("score"));
+        MongoCursor<Document> cursor = collection.find(filter).sort(sort).iterator();
 
-        for (Document cur:all) {
-            System.out.println(cur);
+        int student_id = -1;
+
+        try{
+            while (cursor.hasNext()){
+                Document cur = cursor.next();
+                if (student_id != cur.getInteger("student_id")){
+                    System.out.println(cur);
+                    collection.deleteOne(cur);
+                }
+                student_id = cur.getInteger("student_id");
+            }
+
+        }finally {
+            cursor.close();
         }
 
     }
