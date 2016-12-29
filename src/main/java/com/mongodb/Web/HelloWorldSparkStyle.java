@@ -1,5 +1,7 @@
-package com.mongodb;
+package com.mongodb.Web;
 
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import freemarker.template.Configuration;
@@ -14,20 +16,15 @@ import spark.Spark;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by ljrky on 2016/12/3.
- */
 public class HelloWorldSparkStyle {
-    public static void main( String[] args )
-    {
+    public static void main(String[] args) {
         final Configuration configuration = new Configuration();
         try {
-            configuration.setDirectoryForTemplateLoading(new File( "./src/main/resource"));
+            configuration.setDirectoryForTemplateLoading(new File("./src/main/resource"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -93,10 +90,9 @@ public class HelloWorldSparkStyle {
         Spark.post("/favorite_fruit", new Route() {
             public Object handle(Request request, Response response) throws Exception {
                 final String fruit = request.queryParams("fruit");
-                if(fruit == null){
+                if (fruit == null) {
                     return "Why do not you pick on?";
-                }
-                else {
+                } else {
                     return "you favorite fruit is " + fruit;
                 }
             }

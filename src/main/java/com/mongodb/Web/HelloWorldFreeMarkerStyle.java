@@ -1,4 +1,4 @@
-package com.mongodb;
+package com.mongodb.Web;
 
 
 import freemarker.template.Configuration;
@@ -11,15 +11,11 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by ljrky on 2016/12/3.
- */
 public class HelloWorldFreeMarkerStyle {
-    public static void main( String[] args )
-    {
+    public static void main(String[] args) {
         Configuration configuration = new Configuration();
         try {
-            configuration.setDirectoryForTemplateLoading(new File( "./src/main/resource"));
+            configuration.setDirectoryForTemplateLoading(new File("./src/main/resource"));
         } catch (IOException e) {
             e.printStackTrace();
         }
