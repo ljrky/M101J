@@ -6,9 +6,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Sorts;
 import org.bson.Document;
-import org.bson.conversions.Bson;
+
+import java.util.List;
 
 /**
  * Hello world!
@@ -38,34 +38,71 @@ public class Delete {
 //        }
 
 
+//        //Complicate Delete
+//        MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
+//
+//        MongoDatabase db = client.getDatabase("students");
+//
+//        MongoCollection<Document> collection = db.getCollection("grades");
+//
+//        collection.deleteOne(Filters.gt("_id", 4));
+//
+//        Bson filter = Filters.eq("type", "homework");
+//        Bson sort = Sorts.orderBy(Sorts.ascending("student_id"), Sorts.ascending("score"));
+//        MongoCursor<Document> cursor = collection.find(filter).sort(sort).iterator();
+//
+//        int student_id = -1;
+//
+//        try {
+//            while (cursor.hasNext()) {
+//                Document cur = cursor.next();
+//                if (student_id != cur.getInteger("student_id")) {
+//                    System.out.println(cur);
+//                    collection.deleteOne(cur);
+//                }
+//                student_id = cur.getInteger("student_id");
+//            }
+//
+//        } finally {
+//            cursor.close();
+//        }
+
         //Complicate Delete
         MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
 
-        MongoDatabase db = client.getDatabase("students");
+        MongoDatabase db = client.getDatabase("school");
 
-        MongoCollection<Document> collection = db.getCollection("grades");
+        MongoCollection<Document> collection = db.getCollection("students");
 
-        collection.deleteOne(Filters.gt("_id", 4));
-
-        Bson filter = Filters.eq("type", "homework");
-        Bson sort = Sorts.orderBy(Sorts.ascending("student_id"), Sorts.ascending("score"));
-        MongoCursor<Document> cursor = collection.find(filter).sort(sort).iterator();
-
-        int student_id = -1;
+        MongoCursor<Document> cursor = collection.find().iterator();
 
         try {
             while (cursor.hasNext()) {
-                Document cur = cursor.next();
-                if (student_id != cur.getInteger("student_id")) {
-                    System.out.println(cur);
-                    collection.deleteOne(cur);
+                Document student = cursor.next();
+                List<Document> scores = (List<Document>) student.get("scores");
+                System.out.println(student.getString("name") + " 's score is : " + scores);
+                Document minScoreObject = null;
+                Double minScore = Double.MAX_VALUE;
+
+                for (Document scoreDocument : scores
+                        ) {
+                    String type = scoreDocument.getString("type");
+                    double score = scoreDocument.getDouble("score");
+                    if (type.equals("homework") && score < minScore) {
+                        minScore = score;
+                        minScoreObject = scoreDocument;
+                    }
                 }
-                student_id = cur.getInteger("student_id");
+
+                if (minScore != null) {
+                    scores.remove(minScoreObject);
+                }
+
+                collection.updateOne(Filters.eq("_id", student.get("_id")), new Document("$set", new Document("scores", scores)));
             }
 
         } finally {
             cursor.close();
         }
-
     }
 }
